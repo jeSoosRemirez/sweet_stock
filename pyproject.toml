@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "sweet-stock"
+version = "0.1.0"
+description = ""
+authors = ["jeSoosRemirez <dkhomych0091@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.0"
+sqlalchemy = "^2.0.35"
+alembic = "^1.13.3"
+pydantic = "^2.9.2"
+pydantic-settings = "^2.5.2"
+uvicorn = "^0.32.0"
+asyncpg = "^0.30.0"
+greenlet = "^3.1.1"
+
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.6.8"
+black = "^24.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
