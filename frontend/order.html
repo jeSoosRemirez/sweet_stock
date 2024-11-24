@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Management</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  
+</head>
+<body>
+    <h1 class="text-center my-4">Order Management</h1>
+
+    <!-- Tabs -->
+    <div id="tabs" class="text-center mb-4">
+        <button class="btn btn-primary" onclick="showCreateOrderTab()">Create Order</button>
+        <button class="btn btn-secondary" onclick="showListOrderTab()">List Orders</button>
+    </div>
+    
+    <!-- Create Order Tab -->
+    <div id="createOrderTab" style="display: none;">
+        <h2>Create Order</h2>
+        <form id="orderForm" class="form-group">
+            <div class="form-group">
+                <label for="productSelect">Product</label>
+                <select id="productSelect" class="form-control" required>
+                    <option value="">Select a Product</option>
+                </select>
+            </div>
+    
+            <div class="form-group">
+                <label for="storageSelect">Storage</label>
+                <select id="storageSelect" class="form-control" required>
+                    <option value="">Select a Storage</option>
+                </select>
+            </div>
+    
+            <div class="form-group">
+                <label for="quantityInput">Quantity</label>
+                <input type="number" id="quantityInput" class="form-control" required min="1">
+            </div>
+    
+            <div class="form-group">
+                <label for="weightInput">Weight</label>
+                <input type="number" id="weightInput" class="form-control" required>
+            </div>
+    
+            <div class="form-group">
+                <label for="priceInput">Price</label>
+                <input type="number" id="priceInput" class="form-control" required>
+            </div>
+    
+            <button type="button" class="btn btn-success" onclick="createOrder()">Create Order</button>
+        </form>
+    </div>
+    
+    <!-- List Orders Tab -->
+    <div id="listOrderTab" style="display: none;">
+        <h2>List Orders</h2>
+        <table id="orderListTable" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Product</th>
+                    <th>Storage</th>
+                    <th>Quantity</th>
+                    <th>Weight</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    
+    <!-- Add Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+
+    <script>
+        const productEndpoint = "http://127.0.0.1:8000/api/product/";
+        const storageEndpoint = "http://127.0.0.1:8000/api/storage/";
+        const ordersEndpoint = "http://127.0.0.1:8000/api/order/";
+    
+        let selectedProductId = "";
+        let selectedStorageId = "";
+    
+        async function fetchProducts() {
+            try {
+                const response = await fetch(productEndpoint);
+                const products = await response.json();
+    
+                const productSelect = document.getElementById("productSelect");
+                products.forEach(product => {
+                    const option = document.createElement("option");
+                    option.value = product.id;  // Assume id field exists
+                    option.textContent = product.name;  // Assume name field exists
+                    productSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        }
+    
+        async function fetchStorages() {
+            try {
+                const response = await fetch(storageEndpoint);
+                const storages = await response.json();
+    
+                const storageSelect = document.getElementById("storageSelect");
+                storages.forEach(storage => {
+                    const option = document.createElement("option");
+                    option.value = storage.id;  // Assume id field exists
+                    option.textContent = storage.name;  // Assume name field exists
+                    storageSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error fetching storages:", error);
+            }
+        }
+    
+        const updateProductId = () => {
+            const productSelect = document.getElementById("productSelect");
+            selectedProductId = productSelect.value;
+        };
+    
+        const updateStorageId = () => {
+            const storageSelect = document.getElementById("storageSelect");
+            selectedStorageId = storageSelect.value;
+        };
+    
+        function showCreateOrderTab() {
+            document.getElementById("createOrderTab").style.display = "block";
+            document.getElementById("listOrderTab").style.display = "none";
+        }
+    
+        function showListOrderTab() {
+            document.getElementById("createOrderTab").style.display = "none";
+            document.getElementById("listOrderTab").style.display = "block";
+            fetchOrders();  // Fetch orders when showing the list
+        }
+    
+        async function fetchOrders() {
+            try {
+                const response = await fetch(ordersEndpoint);
+                const orders = await response.json();
+                console.log(orders);  // Add this line to log the fetched orders
+        
+                const orderListTable = document.getElementById("orderListTable").getElementsByTagName('tbody')[0];
+                orderListTable.innerHTML = "";  // Clear existing rows
+        
+                if (orders.length === 0) {
+                    const row = orderListTable.insertRow();
+                    const cell = row.insertCell(0);
+                    cell.colSpan = 7;
+                    cell.textContent = "Nothing found";
+                    return;
+                }
+        
+                orders.forEach(order => {
+                    const row = orderListTable.insertRow();
+                    row.insertCell(0).textContent = order.id;
+                    row.insertCell(1).textContent = order.product_id;  // Assuming product has name
+                    row.insertCell(2).textContent = order.storage_id;  // Assuming storage has name
+                    row.insertCell(3).textContent = order.quantity;
+                    row.insertCell(4).textContent = order.weight;
+                    row.insertCell(5).textContent = order.price;
+        
+                    const actionsCell = row.insertCell(6);
+                    actionsCell.innerHTML = `<button onclick="deleteOrder('${order.id}')">Delete</button>`;
+                });
+            } catch (error) {
+                console.error("Error fetching orders:", error);
+            }
+        }
+        
+    
+        // Create Order
+        async function createOrder() {
+            if (!selectedProductId || !selectedStorageId) {
+                alert("Please select both a product and a storage.");
+                return;
+            }
+    
+            const quantity = document.getElementById("quantityInput").value;
+            const weight = document.getElementById("weightInput").value;
+            const price = document.getElementById("priceInput").value;
+    
+            const orderData = {
+                product_id: selectedProductId,
+                storage_id: selectedStorageId,
+                quantity: quantity,
+                weight: weight,
+                price: price
+            };
+    
+            try {
+                const response = await fetch(ordersEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+    
+                const result = await response.json();
+                if (response.ok) {
+                    alert("Order created successfully!");
+                    showListOrderTab();  // Refresh the order list
+                } else {
+                    alert("Error creating order: " + result.detail);
+                }
+            } catch (error) {
+                console.error("Error creating order:", error);
+            }
+        }
+    
+        async function deleteOrder(orderId) {
+            if (confirm("Are you sure you want to delete this order?")) {
+                try {
+                    const response = await fetch(`${ordersEndpoint}${orderId}`, {
+                        method: 'DELETE'
+                    });
+    
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert("Order deleted successfully!");
+                        fetchOrders();  // Refresh the order list
+                    } else {
+                        alert("Error deleting order: " + result.detail);
+                    }
+                } catch (error) {
+                    console.error("Error deleting order:", error);
+                }
+            }
+        }
+    
+        fetchProducts();
+        fetchStorages();
+    
+        document.getElementById("productSelect").addEventListener("change", updateProductId);
+        document.getElementById("storageSelect").addEventListener("change", updateStorageId);
+    
+    </script>
+    
+
+</body>
+  </html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <!-- Link to Bootstrap CSS for styling -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom styling for tab navigation */
+        .tab-content {
+            padding-top: 20px;
+        }
+        #welcomeTab {
+            display: block;
+        }
+        .tab-pane {
+            display: none;
+        }
+        .tab-pane.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Main Container -->
+<div class="container mt-5">
+    <h1 class="text-center">Welcome to the SweetStock</h1>
+
+    <!-- Tabs -->
+    <div id="tabs" class="mb-3">
+        <ul class="nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link active" id="welcomeTabBtn" href="#" onclick="showTab('welcomeTab')">Welcome</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="providerTabBtn" href="#" onclick="showTab('providerTab')">Provider</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="orderTabBtn" href="#" onclick="showTab('orderTab')">Order</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="productTabBtn" href="#" onclick="showTab('productTab')">Product</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="userTabBtn" href="#" onclick="showTab('userTab')">User</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="storageTabBtn" href="#" onclick="showTab('storageTab')">Storage</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="supplyTabBtn" href="#" onclick="showTab('supplyTab')">Supply</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="tab-content">
+        <!-- Welcome Tab -->
+        <div id="welcomeTab" class="tab-pane active">
+            <h2>Welcome to the SweetStock!</h2>
+            <p>This is the main area where you can access different sections of the application.</p>
+            <p>Select any of the tabs above to get started with your desired section.</p>
+        </div>
+
+        <!-- Placeholder for other tabs (which will be dynamically filled later) -->
+        <!-- Inside the main container, update the providerTab section -->
+<div id="providerTab" class="tab-pane">
+    <h2>Provider Tab</h2>
+    <p>Provider section content will be displayed here.</p>
+    <p>
+        <a href="provider.html" class="btn btn-primary">Go to Provider Management</a>
+    </p>
+</div>
+
+
+        <div id="orderTab" class="tab-pane">
+            <h2>Order Tab</h2>
+            <p>Order section content will be displayed here.</p>
+            <p>
+                <a href="order.html" class="btn btn-primary">Go to Order Management</a>
+            </p>
+        </div>
+
+        <div id="productTab" class="tab-pane">
+            <h2>Product Tab</h2>
+            <p>Product section content will be displayed here.</p>
+            <p>
+                <a href="product.html" class="btn btn-primary">Go to Product Management</a>
+            </p>
+        </div>
+
+        <div id="userTab" class="tab-pane">
+            <h2>User Tab</h2>
+            <p>User section content will be displayed here.</p>
+        </div>
+
+        <div id="storageTab" class="tab-pane">
+            <h2>Storage Tab</h2>
+            <p>Storage section content will be displayed here.</p>
+            <p>
+                <a href="storage.html" class="btn btn-primary">Go to Storage Management</a>
+            </p>
+        </div>
+
+        <div id="supplyTab" class="tab-pane">
+            <h2>Supply Tab</h2>
+            <p>Supply section content will be displayed here.</p>
+            <p>
+                <a href="supply.html" class="btn btn-primary">Go to Supply Management</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS and jQuery (for tabs functionality) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    // Function to switch tabs
+    function showTab(tabId) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-pane').forEach(tab => {
+            tab.classList.remove('active');
+        });
+
+        // Show the selected tab
+        document.getElementById(tabId).classList.add('active');
+
+        // Update the active link
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.classList.remove('active');
+        });
+
+        // Set active class on the clicked tab button
+        const tabBtn = document.getElementById(`${tabId}Btn`);
+        tabBtn.classList.add('active');
+    }
+</script>
+
+</body>
+</html>

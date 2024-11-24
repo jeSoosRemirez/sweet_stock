@@ -1,11 +1,29 @@
 """Models for product and categories."""
 
+from typing import Optional
 from sqlalchemy import String, Float, Integer, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 from database.mixins import GuidPKMixin, CreatedUpdatedMixin
 
 from models.base import BaseModel
+from sqlalchemy import Enum as SaEnum
+from enum import Enum
+
+
+class SupplyType(str, Enum):
+    """Enum for supply type."""
+
+    SUPPLY = "SUPPLY"  # supply to exact storage
+    REDIRECTION = "REDIRECTION"  # redirected product from storage to storage
+
+
+class RoleType(str, Enum):
+    """Enum for user roles."""
+
+    ADMIN = "ADMIN"
+    MANAGER = "MANAGER"
+    WORKER = "WORKER"
 
 
 class Product(GuidPKMixin, CreatedUpdatedMixin, BaseModel):
@@ -14,8 +32,8 @@ class Product(GuidPKMixin, CreatedUpdatedMixin, BaseModel):
     __tablename__ = "product"
 
     name: Mapped[str] = mapped_column(String(64), nullable=False)
-    provider_price: Mapped[float] = mapped_column(Float, nullable=False)
-    sell_price: Mapped[float] = mapped_column(Float, nullable=False)
+    provider_price: Mapped[Integer] = mapped_column(Integer, nullable=False)
+    sell_price: Mapped[Integer] = mapped_column(Integer, nullable=False)
     available_weight: Mapped[float] = mapped_column(Float, nullable=True)
     available_quantity: Mapped[int] = mapped_column(Integer, nullable=True)
     delivery_dt: Mapped[datetime] = mapped_column(DateTime, nullable=True)
@@ -60,21 +78,50 @@ class Provider(GuidPKMixin, CreatedUpdatedMixin, BaseModel):
     email: Mapped[str] = mapped_column(String(64), nullable=False)
 
 
-# class ProductStat(BaseModel):
-#     """Class for product statistics model."""
+class Order(GuidPKMixin, CreatedUpdatedMixin, BaseModel):
+    """Class for order model."""
 
-#     __tablename__ = "product_stat"
+    __tablename__ = "order"
+
+    price: Mapped[int] = mapped_column(Integer, nullable=False)
+    weight: Mapped[float] = mapped_column(Float, nullable=True)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=True)
+
+    storage_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("storage.id"), nullable=False
+    )
+    product_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("product.id"), nullable=False
+    )
 
 
-# class Order(BaseModel):
-#     """Class for order model."""
+class Supply(GuidPKMixin, CreatedUpdatedMixin, BaseModel):
+    """Class for supply model."""
 
-#     __tablename__ = "order"
+    __tablename__ = "supply"
 
-#     id: str
-#     provider_price: float
-#     sell_price: float
-#     sold_weight: float
-#     sold_quantity: int
-#     total_sum: float
-#     sold_at: datetime
+    supply_type: Mapped[SupplyType] = mapped_column(SaEnum(SupplyType))
+    weight: Mapped[float] = mapped_column(Float, nullable=True)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=True)
+
+    from_storage_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("storage.id"), nullable=True
+    )
+    to_storage_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("storage.id"), nullable=True
+    )
+    product_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("product.id"), nullable=False
+    )
+
+
+class User(GuidPKMixin, CreatedUpdatedMixin, BaseModel):
+    """Class for user model."""
+
+    __tablename__ = "user"
+
+    role: Mapped[RoleType] = mapped_column(SaEnum(RoleType))
+    username: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    email: Mapped[str] = mapped_column(String(128), nullable=False, unique=True)
+    full_name: Mapped[Optional[str]] = mapped_column(String(128), nullable=True)
+    password: Mapped[str] = mapped_column(String(128), nullable=False)

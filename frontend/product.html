@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Management</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <h1 class="text-center my-4">Product Management</h1>
+
+    <!-- Tabs -->
+    <div id="tabs" class="text-center mb-4">
+        <button class="btn btn-primary" onclick="showCreateProductTab()">Create Product</button>
+        <button class="btn btn-secondary" onclick="showListProductTab()">List Products</button>
+    </div>
+    
+    <!-- Create Product Tab -->
+    <div id="createProductTab" style="display: none;">
+        <h2>Create Product</h2>
+        <form id="productForm" class="form-group">
+            <div class="form-group">
+                <label for="productNameInput">Product Name</label>
+                <input type="text" id="productNameInput" class="form-control" required>
+            </div>
+    
+            <div class="form-group">
+                <label for="providerPriceInput">Provider Price</label>
+                <input type="number" id="providerPriceInput" class="form-control" required>
+            </div>
+    
+            <div class="form-group">
+                <label for="sellPriceInput">Selling Price</label>
+                <input type="number" id="sellPriceInput" class="form-control" required>
+            </div>
+    
+            <div class="form-group">
+                <label for="storageSelect">Storage</label>
+                <select id="storageSelect" class="form-control" required onchange="updateStorageId()">
+                    <option value="">Select a Storage</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="providerSelect">Provider</label>
+                <select id="providerSelect" class="form-control" required onchange="updateProviderId()">
+                    <option value="">Select a Provider</option>
+                </select>
+            </div>
+            
+
+            <div class="form-group">
+                <label for="quantityInput">Available Quantity</label>
+                <input type="number" id="quantityInput" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label for="weightInput">Available Weight</label>
+                <input type="number" id="weightInput" class="form-control" required>
+            </div>
+
+            <button type="button" class="btn btn-success" onclick="createProduct()">Create Product</button>
+        </form>
+    </div>
+    
+    <!-- List Products Tab -->
+    <div id="listProductTab" style="display: none;">
+        <h2>List Products</h2>
+        <table id="productListTable" class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Product ID</th>
+                    <th>Name</th>
+                    <th>Provider Price</th>
+                    <th>Selling Price</th>
+                    <th>Storage</th>
+                    <th>Provider</th>
+                    <th>Available Quantity</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <!-- Add Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        const productEndpoint = "http://127.0.0.1:8000/api/product/";
+        const providerEndpoint = "http://127.0.0.1:8000/api/provider/";
+        const storageEndpoint = "http://127.0.0.1:8000/api/storage/";
+        const productsListEndpoint = "http://127.0.0.1:8000/api/product/";
+    
+        let selectedProviderId = "";
+        let selectedStorageId = "";
+    
+        async function fetchProviders() {
+            try {
+                const response = await fetch(providerEndpoint);
+                const providers = await response.json();
+    
+                const providerSelect = document.getElementById("providerSelect");
+                providers.forEach(provider => {
+                    const option = document.createElement("option");
+                    option.value = provider.id;  // Assuming provider has an id field
+                    option.textContent = provider.name;  // Assuming provider has a name field
+                    providerSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error fetching providers:", error);
+            }
+        }
+    
+        async function fetchStorages() {
+            try {
+                const response = await fetch(storageEndpoint);
+                const storages = await response.json();
+    
+                const storageSelect = document.getElementById("storageSelect");
+                storages.forEach(storage => {
+                    const option = document.createElement("option");
+                    option.value = storage.id;  // Assuming storage has an id field
+                    option.textContent = storage.name;  // Assuming storage has a name field
+                    storageSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error fetching storages:", error);
+            }
+        }
+    
+        const updateProviderId = () => {
+            const providerSelect = document.getElementById("providerSelect");
+            selectedProviderId = providerSelect.value;
+        };
+    
+        const updateStorageId = () => {
+            const storageSelect = document.getElementById("storageSelect");
+            selectedStorageId = storageSelect.value;
+        };
+    
+        function showCreateProductTab() {
+            document.getElementById("createProductTab").style.display = "block";
+            document.getElementById("listProductTab").style.display = "none";
+        }
+    
+        function showListProductTab() {
+            document.getElementById("createProductTab").style.display = "none";
+            document.getElementById("listProductTab").style.display = "block";
+            fetchProducts();  // Fetch products when showing the list
+        }
+    
+        async function fetchProducts() {
+            try {
+                const response = await fetch(productsListEndpoint);
+                const products = await response.json();
+                console.log(products);  // Add this line to log the fetched products
+        
+                const productListTable = document.getElementById("productListTable").getElementsByTagName('tbody')[0];
+                productListTable.innerHTML = "";  // Clear existing rows
+        
+                if (products.length === 0) {
+                    const row = productListTable.insertRow();
+                    const cell = row.insertCell(0);
+                    cell.colSpan = 8;
+                    cell.textContent = "Nothing found";
+                    return;
+                }
+        
+                products.forEach(product => {
+                    const row = productListTable.insertRow();
+                    row.insertCell(0).textContent = product.id;
+                    row.insertCell(1).textContent = product.name;
+                    row.insertCell(2).textContent = product.provider_price;
+                    row.insertCell(3).textContent = product.sell_price;
+                    row.insertCell(4).textContent = product.storage;  // Assuming storage has name
+                    row.insertCell(5).textContent = product.provider;  // Assuming provider has name
+                    row.insertCell(6).textContent = product.available_quantity;
+        
+                    const actionsCell = row.insertCell(7);
+                    actionsCell.innerHTML = `<button onclick="deleteProduct('${product.id}')">Delete</button>`;
+                });
+            } catch (error) {
+                console.error("Error fetching products:", error);
+            }
+        }
+
+        // Create Product
+        async function createProduct() {
+            // Ensure the provider and storage have been selected before proceeding
+            if (!selectedProviderId || !selectedStorageId) {
+                alert("Please select both a provider and a storage.");
+                return;
+            }
+        
+            const name = document.getElementById("productNameInput").value;
+            const providerPrice = document.getElementById("providerPriceInput").value;
+            const sellPrice = document.getElementById("sellPriceInput").value;
+            const quantity = document.getElementById("quantityInput").value;
+            const weight = document.getElementById("weightInput").value;
+        
+            const productData = {
+                name: name,
+                provider_price: providerPrice,
+                sell_price: sellPrice,
+                available_quantity: quantity,
+                available_weight: weight,
+                provider_id: selectedProviderId,
+                storage: selectedStorageId
+            };
+        
+            try {
+                const response = await fetch(productEndpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(productData)
+                });
+        
+                const result = await response.json();
+                if (response.ok) {
+                    alert("Product created successfully!");
+                    showListProductTab();  // Refresh the product list
+                } else {
+                    alert("Error creating product: " + result.detail);
+                }
+            } catch (error) {
+                console.error("Error creating product:", error);
+            }
+        }
+        
+    
+        async function deleteProduct(productId) {
+            if (confirm("Are you sure you want to delete this product?")) {
+                try {
+                    const response = await fetch(`${productEndpoint}${productId}`, {
+                        method: "DELETE",
+                    });
+                    const result = await response.json();
+                    if (response.ok) {
+                        alert("Product deleted successfully!");
+                        fetchProducts();  // Refresh the product list
+                    } else {
+                        alert("Error deleting product: " + result.detail);
+                    }
+                } catch (error) {
+                    console.error("Error deleting product:", error);
+                }
+            }
+        }
+
+        // Fetch providers and storages when the page loads
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchProviders();
+            fetchStorages();
+        });
+    </script>
+</body>
+</html>

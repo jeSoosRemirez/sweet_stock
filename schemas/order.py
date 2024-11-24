@@ -1,16 +1,46 @@
-"""Schemas for order."""
-
+from pydantic import BaseModel, Field
+from typing import Optional
 from datetime import datetime
-from pydantic import BaseModel
 
 
-class OrderSchema(BaseModel):
-    """Schema for order model representation."""
+class OrderRetrieve(BaseModel):
+    """Model for retrieving an order."""
 
     id: str
-    provider_price: float
-    sell_price: float
-    sold_weight: float | None
-    sold_quantity: int | None
-    total_sum: float
-    sold_at: datetime
+    price: int
+    weight: Optional[float]
+    quantity: Optional[int]
+    storage_id: str
+    product_id: str
+    created_at: Optional[str | datetime]
+    updated_at: Optional[str | datetime]
+
+
+class OrderCreate(BaseModel):
+    """Model for creating an order."""
+
+    price: int = Field(
+        ..., ge=0, description="Price of the order, must be non-negative"
+    )
+    weight: Optional[float] = Field(
+        None, ge=0, description="Weight of the order, optional"
+    )
+    quantity: Optional[int] = Field(
+        None, ge=0, description="Quantity of the order, must be at least 1"
+    )
+    storage_id: str = Field(..., description="ID of the storage")
+    product_id: str = Field(..., description="ID of the product")
+
+
+class OrderUpdate(BaseModel):
+    """Model for updating an order."""
+
+    price: Optional[int] = Field(None, ge=0, description="Updated price of the order")
+    weight: Optional[float] = Field(
+        None, ge=0, description="Updated weight of the order"
+    )
+    quantity: Optional[int] = Field(
+        None, ge=0, description="Updated quantity of the order"
+    )
+    storage_id: Optional[str] = Field(None, description="Updated storage ID")
+    product_id: Optional[str] = Field(None, description="Updated product ID")
