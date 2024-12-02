@@ -1,0 +1,59 @@
+/* styles.css */
+
+/* Example of styling the product dropdown */
+#productSelect {
+    padding: 10px;
+    font-size: 14px;
+    width: 200px;
+    margin-bottom: 10px;
+}
+
+/* Example of styling the storage dropdown */
+#storageSelect {
+    padding: 10px;
+    font-size: 14px;
+    width: 200px;
+    margin-bottom: 10px;
+}
+
+/* Styling for the create order button */
+#createOrderBtn {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#createOrderBtn:hover {
+    background-color: #45a049;
+}
+
+/* Styling for the order list table */
+#orderListTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#orderListTable th, #orderListTable td {
+    padding: 8px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+#orderListTable th {
+    background-color: #f2f2f2;
+}
+
+#orderListTable td button {
+    padding: 5px 10px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+#orderListTable td button:hover {
+    background-color: #e53935;
+}

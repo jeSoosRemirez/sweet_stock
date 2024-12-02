@@ -1,37 +1,65 @@
-"""Endpoints for the storage."""
-
-from typing import Annotated
-from fastapi import APIRouter, Query
-from schemas.storage import (
-    StorageSchema,
-    CreateStorageSchema,
-)
+from fastapi import APIRouter, HTTPException
+from schemas.storage import StorageCreate, StorageRetrieve, StorageUpdate
 from service.storage import StorageService
 
+# Initialize the router with a prefix and tags
 router = APIRouter(prefix="/storage", tags=["storage"])
 
 
-@router.post("")
-async def create_storage(body: CreateStorageSchema) -> StorageSchema:
-    """Create method for Storage model."""
-    storage = await StorageService.create_storage(
-        body=body,
-    )
+# Create a storage
+@router.post("/", response_model=StorageRetrieve)
+async def create_storage(body: StorageCreate):
+    """Create a new storage."""
+    try:
+        # Call the service method to create the storage
+        storage = await StorageService.create_storage(body)
+        return storage
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    if not storage:
-        return {"message": "Something went wrong."}
 
-    return storage
+# Get a storage by ID
+@router.get("/{storage_id}", response_model=StorageRetrieve)
+async def get_storage(storage_id: str):
+    """Get a storage by its ID."""
+    try:
+        # Call the service method to get the storage
+        storage = await StorageService.get_storage(storage_id)
+        return storage
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
-@router.get("/{id}")
-async def get_storage(storage_id: Annotated[str, Query(alias="id")]) -> StorageSchema:
-    """Get method for Storage model."""
-    storage = await StorageService.get_storage(
-        storage_id=storage_id,
-    )
+@router.get("/", response_model=list[StorageRetrieve])
+async def list_storages():
+    """Get a storage by its ID."""
+    try:
+        # Call the service method to get the storage
+        storage = await StorageService.list_storages()
+        return storage
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
-    if not storage:
-        return {"message": "Something went wrong."}
 
-    return storage
+# Update a storage by ID
+@router.put("/{storage_id}", response_model=StorageRetrieve)
+async def update_storage(storage_id: str, body: StorageUpdate):
+    """Update a storage by its ID."""
+    try:
+        # Call the service method to update the storage
+        storage = await StorageService.update_storage(storage_id, body)
+        return storage
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+# Delete a storage by ID
+@router.delete("/{storage_id}", response_model=StorageRetrieve)
+async def delete_storage(storage_id: str):
+    """Delete a storage by its ID."""
+    try:
+        # Call the service method to delete the storage
+        storage = await StorageService.delete_storage(storage_id)
+        return storage
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))

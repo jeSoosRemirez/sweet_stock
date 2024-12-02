@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Provider Management</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Custom styling */
+        .tab-button {
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1 class="text-center">Provider Management</h1>
+    
+    <!-- Tab buttons for Create and List -->
+    <div id="tabs">
+        <button class="btn btn-primary tab-button" onclick="showCreateProviderTab()">Create Provider</button>
+        <button class="btn btn-primary tab-button" onclick="showListProviderTab()">List Providers</button>
+    </div>
+
+    <!-- Create Provider Tab -->
+    <div id="createProviderTab" style="display: none;">
+        <h2>Create Provider</h2>
+<form id="providerForm">
+    <label for="providerNameInput">Name</label>
+    <input type="text" id="providerNameInput" required><br><br>
+
+    <label for="providerTelephoneInput">Telephone</label>
+    <input type="text" id="providerTelephoneInput"><br><br>
+
+    <label for="providerAddressInput">Address</label>
+    <input type="text" id="providerAddressInput" required><br><br>
+
+    <label for="providerEmailInput">Email</label>
+    <input type="email" id="providerEmailInput" required><br><br>
+
+    <button type="button" onclick="createProvider()">Create Provider</button>
+</form>
+
+    </div>
+
+    <!-- List Providers Tab -->
+    <div id="listProviderTab" style="display: none;">
+        <h2>List Providers</h2>
+        <table id="providerListTable" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Provider ID</th>
+                    <th>Name</th>
+                    <th>Contact</th>
+                    <th>Address</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script>
+    const API_URL = "http://127.0.0.1:8000/api/provider/";
+
+    // Function to toggle tabs
+    function showCreateProviderTab() {
+        document.getElementById("createProviderTab").style.display = "block";
+        document.getElementById("listProviderTab").style.display = "none";
+    }
+
+    function showListProviderTab() {
+        document.getElementById("createProviderTab").style.display = "none";
+        document.getElementById("listProviderTab").style.display = "block";
+        fetchProviders();  // Load the list of providers when the tab is displayed
+    }
+
+    // Fetch and display providers in the table
+    async function fetchProviders() {
+        try {
+            const response = await fetch(API_URL);
+            const providers = await response.json();
+    
+            const providerListTable = document.getElementById("providerListTable").getElementsByTagName('tbody')[0];
+            providerListTable.innerHTML = "";  // Clear existing rows
+    
+            if (providers.length === 0) {
+                const row = providerListTable.insertRow();
+                const cell = row.insertCell(0);
+                cell.colSpan = 5;
+                cell.textContent = "No providers found";
+                return;
+            }
+    
+            providers.forEach(provider => {
+                const row = providerListTable.insertRow();
+                row.insertCell(0).textContent = provider.id;
+                row.insertCell(1).textContent = provider.name;
+                row.insertCell(2).textContent = provider.telephone_number || 'N/A';
+                row.insertCell(3).textContent = provider.address;
+                row.insertCell(4).textContent = provider.email;
+            });
+        } catch (error) {
+            console.error("Error fetching providers:", error);
+        }
+    }
+    
+
+    // Function to handle creating a provider
+    async function createProvider() {
+        const name = document.getElementById("providerNameInput").value;
+        const telephone = document.getElementById("providerTelephoneInput").value;
+        const address = document.getElementById("providerAddressInput").value;
+        const email = document.getElementById("providerEmailInput").value;
+    
+        const newProvider = {
+            name: name,
+            telephone_number: telephone,  // Optional field
+            address: address,
+            email: email
+        };
+    
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newProvider)
+            });
+    
+            if (response.ok) {
+                const createdProvider = await response.json();
+                alert("Provider created successfully!");
+                console.log(createdProvider);  // Show the created provider
+                document.getElementById("providerForm").reset(); // Reset the form
+                showListProviderTab(); // Optionally switch to the provider list tab
+            } else {
+                const errorResponse = await response.json();
+                console.error("Failed to create provider:", errorResponse);
+                alert(`Failed to create provider: ${errorResponse.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error("Error creating provider:", error);
+            alert("Error creating provider.");
+        }
+    }
+    
+    
+    
+
+    // Function to handle deleting a provider
+    async function deleteProvider(providerId) {
+        try {
+            const response = await fetch(`${API_URL}${providerId}/`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                alert("Provider deleted successfully!");
+                fetchProviders(); // Re-fetch and update the table
+            } else {
+                alert("Failed to delete provider.");
+            }
+        } catch (error) {
+            console.error("Error deleting provider:", error);
+        }
+    }
+</script>
+
+</body>
+</html>

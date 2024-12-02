@@ -6,9 +6,12 @@ from fastapi import APIRouter
 
 root_router = APIRouter(prefix="/api", tags=["all"])
 modules = (
+    "order",
     "product",
     "provider",
     "storage",
+    "supply",
+    "user",
 )
 
 
